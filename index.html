@@ -4,18 +4,144 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bring United Home</title>
-  <style>
-    body { font-family: Georgia, serif; max-width: 40rem; margin: 4rem auto; padding: 0 1.25rem; line-height: 1.5; color: #1a1a1a; }
-    a { color: #c8102e; }
-    button, .button { display: inline-block; background: #c8102e; color: white; text-decoration: none; padding: 0.8rem 1.2rem; border-radius: 4px; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <p>A pledge to own the club. Not a chant, and not a share already bought.</p>
-  <h1>Bring United Home</h1>
-  <p>Manchester United supporters can register what they would pay toward fan ownership. No money is collected. A pledge does not buy a share, a vote, or a promise of profit.</p>
-  <p><a class="button" href="https://forms.gle/htHzcZbCBV9kAFiE7">Register your pledge</a></p>
-  <p>One person, one future vote. The price of that vote is $5,000, which can be paid in installments once a proper structure exists. Paying more would buy a larger non-voting certificate, up to $50,000. Nothing is due now.</p>
-  <p>Questions: hello@bringunitedhome.org. That inbox is not open yet.</p>
+  <header class="wrap site-header">
+    <a class="wordmark" href="/">Bring United Home</a>
+    <button class="pledge-button" id="open-pledge" type="button">Pledge</button>
+  </header>
+
+  <main class="wrap">
+    <p class="kicker">A pledge to own the club</p>
+    <h1>Bring United Home</h1>
+    <p class="lede">Register what you would pay toward a supporter-owned Manchester United. No money is collected. A pledge does not buy a share, a vote, or a promise of profit.</p>
+
+    <section class="counter" aria-live="polite">
+      <p class="counter-label">Amount pledged</p>
+      <p class="counter-value" id="amount-pledged">$0</p>
+      <div class="below">
+        <div class="stats">
+          <div class="stat"><span>Supporters</span><strong id="supporters">0</strong></div>
+          <div class="stat"><span>Still to raise</span><strong id="remaining">$10,000,000,000</strong></div>
+          <div class="stat"><span>Countries</span><strong id="countries">0</strong></div>
+        </div>
+        <div class="message">
+          <p>The future vote is $5,000, in one payment or in installments, once a legal structure exists. Until then this page is a public register of intent. No person can pledge more than $50,000.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="spread">
+      <article class="manifesto">
+        <h2>The pledge</h2>
+        <p>Manchester United is a public company with two classes of shares. Buying what trades on the exchange does not buy control. A register of supporters does not buy it either. It shows, in names and amounts, that fans would fund a serious bid if the owners were willing to sell.</p>
+        <p>The money stays in your account. The number on this page is what people have said they would commit, not what has been paid. If a purchase ever becomes possible, it will need its own legal structure, a published set of rules, and a fresh decision from each person.</p>
+        <p>Control, if it is ever won, has to stay with members: one person, one vote, held by a body that cannot sell the club for the benefit of its members. A larger pledge does not buy a second vote.</p>
+      </article>
+      <aside class="promises">
+        <h2>Three promises</h2>
+        <ol>
+          <li><strong>No money yet</strong><span>Nothing is collected until there is a legal structure and published rules.</span></li>
+          <li><strong>No guarantee</strong><span>A pledge is not a takeover, a share, or a return.</span></li>
+          <li><strong>One vote</strong><span>Above the threshold, every member has the same vote.</span></li>
+        </ol>
+      </aside>
+    </section>
+
+    <section class="map-section">
+      <h2>Where pledges come from</h2>
+      <div id="map" role="img" aria-label="Countries shaded by the number of pledges"></div>
+    </section>
+
+    <section class="register">
+      <div>
+        <h2>Recent pledges</h2>
+        <ol id="recent"></ol>
+      </div>
+      <div>
+        <h2>Largest pledges</h2>
+        <ol id="largest"></ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap site-footer">
+    <p>hello@bringunitedhome.org is not open yet. This page is not affiliated with Manchester United Football Club. No money is collected here.</p>
+  </footer>
+
+  <div class="overlay" id="overlay" hidden></div>
+  <aside class="panel" id="panel" hidden aria-labelledby="panel-title">
+    <div class="panel-head">
+      <h2 id="panel-title">Pledge</h2>
+      <button class="close" id="close-pledge" type="button">Close</button>
+    </div>
+    <div id="form-fields">
+      <p>Say what you would pay. You are not paying it now.</p>
+      <form id="pledge-form" novalidate>
+        <div class="row">
+          <div>
+            <label for="first-name">First name</label>
+            <input id="first-name" name="firstName" required autocomplete="given-name">
+          </div>
+          <div>
+            <label for="last-name">Last name</label>
+            <input id="last-name" name="lastName" required autocomplete="family-name">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="age">Age</label>
+            <input id="age" name="age" type="number" min="1" max="120" required inputmode="numeric">
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="email">
+          </div>
+        </div>
+        <label for="country">Country</label>
+        <select id="country" name="country" required>
+          <option value="">Loading countries…</option>
+        </select>
+        <label for="amount">Amount you would commit, in dollars</label>
+        <input id="amount" name="amount" type="number" min="1" max="50000" step="1" required inputmode="decimal">
+        <label for="payment">Would you pay in one payment or in installments?</label>
+        <select id="payment" name="payment" required>
+          <option value="One payment">One payment</option>
+          <option value="Installments">Installments</option>
+        </select>
+        <label class="check" for="is-public">
+          <input id="is-public" name="isPublic" type="checkbox">
+          <span>Show this pledge publicly. Your display name, country, and amount can appear on the page. Your email and legal name will not.</span>
+        </label>
+        <label for="display-name">Display name</label>
+        <input id="display-name" name="displayName" autocomplete="nickname">
+        <label class="check" for="agreed">
+          <input id="agreed" name="agreed" type="checkbox" required>
+          <span>I understand that this is a pledge of intent. I am not sending money, buying a share, or being promised a vote or a profit.</span>
+        </label>
+        <div class="hp" aria-hidden="true">
+          <label for="company">Company</label>
+          <input id="company" name="company" tabindex="-1" autocomplete="off">
+        </div>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <button class="pledge-button" id="submit-pledge" type="submit">Register pledge</button>
+      </form>
+    </div>
+    <div id="success" hidden>
+      <p class="success-line">Your pledge is on the register.</p>
+      <label for="share-line">Share this</label>
+      <textarea class="share" id="share-line" readonly></textarea>
+      <button class="pledge-button" id="copy-share" type="button">Copy</button>
+    </div>
+  </aside>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
