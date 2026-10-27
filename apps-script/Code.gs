@@ -77,7 +77,6 @@ function validate_(data) {
   if (!isFinite(amount) || amount < 1 || amount > 50000) return { error: "Enter an amount from $1 to $50,000." };
   if (payment !== "One payment" && payment !== "Installments") return { error: "Choose how you would pay." };
   if (!agreed) return { error: "The agreement is required." };
-  if (isPublic && !displayName) return { error: "A public pledge needs a display name." };
 
   return {
     value: {

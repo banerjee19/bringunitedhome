@@ -20,7 +20,6 @@
   var share = document.getElementById("share-line");
   var panel = document.getElementById("panel");
   var overlay = document.getElementById("overlay");
-  var displayName = document.getElementById("display-name");
   var isPublic = document.getElementById("is-public");
 
   var map;
@@ -34,7 +33,6 @@
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") closePanel();
   });
-  isPublic.addEventListener("change", toggleDisplayName);
   form.addEventListener("submit", onSubmit);
   document.getElementById("copy-share").addEventListener("click", function () {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -196,13 +194,14 @@
     document.body.style.overflow = "";
   }
 
-  function toggleDisplayName() {
-    displayName.required = isPublic.checked;
-  }
-
   function onSubmit(event) {
     event.preventDefault();
     formError.textContent = "";
+    var missing = missingFields();
+    if (missing) {
+      formError.textContent = missing;
+      return;
+    }
     if (!config.scriptUrl) {
       formError.textContent = "The pledge book is not connected yet.";
       return;
@@ -276,6 +275,19 @@
       };
       document.body.appendChild(script);
     });
+  }
+
+  function missingFields() {
+    if (!value("first-name") || !value("last-name")) return "Enter your first and last name.";
+    var age = Number(value("age"));
+    if (!value("age") || !isFinite(age) || age < 1 || age > 120) return "Enter your age.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value("email"))) return "Enter a valid email address.";
+    if (!value("country")) return "Choose a country.";
+    var amount = Number(value("amount"));
+    if (!value("amount") || !isFinite(amount) || amount < 1 || amount > 50000) return "Enter an amount from $1 to $50,000.";
+    if (!value("payment")) return "Choose how you would pay.";
+    if (!document.getElementById("agreed").checked) return "The agreement is required.";
+    return "";
   }
 
   function value(id) {

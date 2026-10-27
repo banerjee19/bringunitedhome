@@ -13,7 +13,11 @@
 <body>
   <header class="wrap site-header">
     <a class="wordmark" href="/">Bring United Home</a>
-    <button class="pledge-button" id="open-pledge" type="button">Pledge</button>
+    <nav class="nav" aria-label="Page">
+      <a href="#about">About</a>
+      <a href="#faq">FAQ</a>
+      <a href="#register">Register</a>
+    </nav>
   </header>
 
   <main class="wrap">
@@ -22,7 +26,10 @@
     <p class="lede">Register what you would pay toward a supporter-owned Manchester United. No money is collected. A pledge does not buy a share, a vote, or a promise of profit.</p>
 
     <section class="counter" aria-live="polite">
-      <p class="counter-label">Amount pledged</p>
+      <div class="counter-head">
+        <p class="counter-label">Amount pledged</p>
+        <button class="pledge-button" id="open-pledge" type="button">Pledge</button>
+      </div>
       <p class="counter-value" id="amount-pledged">$0</p>
       <div class="below">
         <div class="stats">
@@ -58,7 +65,28 @@
       <div id="map" role="img" aria-label="Countries shaded by the number of pledges"></div>
     </section>
 
-    <section class="register">
+    <section class="about" id="about">
+      <h2>About us</h2>
+      <p>Bring United Home is a register of Manchester United supporters who would put their own money toward a supporter-owned club. This paragraph is a placeholder. Replace it with who you are, why you started the register, and how a person can reach you.</p>
+    </section>
+
+    <section class="faq" id="faq">
+      <h2>FAQ</h2>
+      <dl>
+        <dt>Is any money being taken?</dt>
+        <dd>No. A pledge records what you would pay later. Nothing is charged, and the page has no payment button.</dd>
+        <dt>Does a pledge buy a share or a vote?</dt>
+        <dd>No. It is a statement of intent. A share, a vote, and any legal structure would have to be created separately, and you would be asked again before any money moved.</dd>
+        <dt>What is the $10 billion figure?</dt>
+        <dd>It is the working target for buying the club and clearing its debt, not cash in hand. The large number is the sum of pledges. Still to raise is that target minus the sum.</dd>
+        <dt>Who can see my details?</dt>
+        <dd>Your email, age, and legal name stay off the page. Your display name, country, and amount appear only if you tick the public box.</dd>
+        <dt>What if the owners never sell?</dt>
+        <dd>The register can still show the scale of support. It does not force a sale, and a pledge does not become a debt you owe.</dd>
+      </dl>
+    </section>
+
+    <section class="register" id="register">
       <div>
         <h2>Recent pledges</h2>
         <ol id="recent"></ol>
@@ -118,7 +146,7 @@
           <input id="is-public" name="isPublic" type="checkbox">
           <span>Show this pledge publicly. Your display name, country, and amount can appear on the page. Your email and legal name will not.</span>
         </label>
-        <label for="display-name">Display name</label>
+        <label for="display-name">Display name, optional</label>
         <input id="display-name" name="displayName" autocomplete="nickname">
         <label class="check" for="agreed">
           <input id="agreed" name="agreed" type="checkbox" required>
