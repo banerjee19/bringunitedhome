@@ -71,32 +71,38 @@ a { color: var(--red); }
 }
 
 .pledge-hero {
-  padding: 1.15rem 1.7rem;
-  font-size: 1.05rem;
-  letter-spacing: 0.08em;
+  padding: 0.58rem 0.85rem;
+  font-size: 0.53rem;
+  letter-spacing: 0.06em;
 }
 
 .pledge-button:hover { background: var(--red-dark); }
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(14rem, 1fr);
-  gap: 1.75rem;
+  grid-template-columns: minmax(0, 1fr) 16.5rem;
+  column-gap: 2rem;
   align-items: stretch;
-  margin-top: 2.2rem;
+  margin-top: 1.75rem;
 }
 
 .hero-portrait {
+  position: relative;
+  width: 16.5rem;
   margin: 0;
+  justify-self: end;
+  align-self: stretch;
+  overflow: hidden;
   background: #141210;
 }
 
 .hero-portrait img {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 22%;
+  object-position: center 18%;
 }
 
 .kicker {
@@ -138,8 +144,8 @@ h1 {
 .counter-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  justify-content: flex-start;
+  gap: 1.25rem;
   margin-top: 1.35rem;
 }
 
@@ -344,7 +350,11 @@ input, select {
 
 @media (max-width: 800px) {
   .hero, .spread, .register, .row { grid-template-columns: 1fr; }
-  .hero-portrait img { height: min(70vw, 520px); }
+  .hero-portrait {
+    width: min(16.5rem, 100%);
+    height: 22rem;
+    margin-left: auto;
+  }
   .counter-row { flex-wrap: wrap; }
   .stats { grid-template-columns: 1fr; }
   #map { height: 320px; }
