@@ -71,15 +71,36 @@ a { color: var(--red); }
 }
 
 .pledge-hero {
-  padding: 2.1rem 3.6rem;
-  font-size: 2.1rem;
+  padding: 1.15rem 1.7rem;
+  font-size: 1.05rem;
   letter-spacing: 0.08em;
 }
 
 .pledge-button:hover { background: var(--red-dark); }
 
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(14rem, 1fr);
+  gap: 1.75rem;
+  align-items: stretch;
+  margin-top: 2.2rem;
+}
+
+.hero-portrait {
+  margin: 0;
+  background: #141210;
+}
+
+.hero-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+}
+
 .kicker {
-  margin: 2.5rem 0 0.4rem;
+  margin: 0 0 0.4rem;
   color: var(--muted);
   font-size: 0.82rem;
   letter-spacing: 0.14em;
@@ -104,7 +125,7 @@ h1 {
   font-size: 1.2rem;
 }
 
-.counter { margin-top: 3rem; }
+.counter { margin-top: 2.4rem; }
 
 .counter-label {
   margin: 0;
@@ -118,7 +139,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 1.5rem;
   margin-top: 1.35rem;
 }
 
@@ -129,19 +150,13 @@ h1 {
   letter-spacing: -0.04em;
 }
 
-.below {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
-  gap: 1.5rem;
-  margin-top: 1.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--rule);
-}
-
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
 }
 
 .stat {
@@ -166,14 +181,6 @@ h1 {
   text-align: center;
   white-space: nowrap;
 }
-
-.message {
-  border-left: 1px solid var(--ink);
-  padding-left: 1rem;
-  color: var(--ink);
-}
-
-.message p { margin: 0; }
 
 .spread {
   display: grid;
@@ -336,9 +343,9 @@ input, select {
 }
 
 @media (max-width: 800px) {
-  .below, .spread, .register, .row { grid-template-columns: 1fr; }
+  .hero, .spread, .register, .row { grid-template-columns: 1fr; }
+  .hero-portrait img { height: min(70vw, 520px); }
   .counter-row { flex-wrap: wrap; }
-  .pledge-hero { margin-left: auto; padding: 1.2rem 2rem; font-size: 1.35rem; }
   .stats { grid-template-columns: 1fr; }
   #map { height: 320px; }
 }
