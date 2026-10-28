@@ -13,6 +13,8 @@
   var recentEl = document.getElementById("recent");
   var largestEl = document.getElementById("largest");
   var countrySelect = document.getElementById("country");
+  var codeSelect = document.getElementById("country-code");
+  var phoneError = document.getElementById("phone-error");
   var form = document.getElementById("pledge-form");
   var formError = document.getElementById("form-error");
   var formFields = document.getElementById("form-fields");
@@ -36,6 +38,7 @@
     if (event.key === "Escape") closePanel();
   });
   form.addEventListener("submit", onSubmit);
+  countrySelect.addEventListener("change", syncCountryCode);
   document.getElementById("copy-share").addEventListener("click", function () {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(share.value);
@@ -150,6 +153,7 @@
   function loadMap() {
     if (typeof L === "undefined") {
       countrySelect.innerHTML = '<option value="">Country list unavailable</option>';
+      fillCodeList([]);
       return;
     }
     map = L.map("map", {
@@ -167,6 +171,7 @@
       })
       .catch(function () {
         countrySelect.innerHTML = '<option value="United Kingdom">United Kingdom</option>';
+        fillCodeList(["United Kingdom"]);
       });
   }
 
@@ -184,6 +189,39 @@
       option.textContent = name;
       countrySelect.appendChild(option);
     });
+    fillCodeList(names);
+  }
+
+  function fillCodeList(names) {
+    var codes = window.BUH_CODES || {};
+    codeSelect.innerHTML = '<option value="">Country code</option>';
+    names.forEach(function (name) {
+      var code = codes[name];
+      if (!code) return;
+      var option = document.createElement("option");
+      option.value = name;
+      option.setAttribute("data-code", code);
+      option.textContent = name + " " + code;
+      codeSelect.appendChild(option);
+    });
+  }
+
+  function syncCountryCode() {
+    var name = countrySelect.value;
+    var matched = false;
+    for (var i = 0; i < codeSelect.options.length; i++) {
+      if (codeSelect.options[i].value === name) {
+        codeSelect.selectedIndex = i;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) codeSelect.selectedIndex = 0;
+  }
+
+  function selectedCode() {
+    var option = codeSelect.options[codeSelect.selectedIndex];
+    return option ? (option.getAttribute("data-code") || "") : "";
   }
 
   function paintMap() {
@@ -242,8 +280,10 @@
   function onSubmit(event) {
     event.preventDefault();
     formError.textContent = "";
+    var phoneMessage = phoneProblem();
+    phoneError.textContent = phoneMessage;
     var missing = missingFields();
-    if (missing) {
+    if (phoneMessage || missing) {
       formError.textContent = missing;
       return;
     }
@@ -256,6 +296,8 @@
       lastName: value("last-name"),
       age: value("age"),
       email: value("email"),
+      countryCode: selectedCode(),
+      phone: value("phone"),
       country: value("country"),
       amount: value("amount"),
       payment: value("payment"),
@@ -328,10 +370,20 @@
     if (!value("age") || !isFinite(age) || age < 1 || age > 120) return "Enter your age.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value("email"))) return "Enter a valid email address.";
     if (!value("country")) return "Choose a country.";
+    if (!selectedCode()) return "Choose a country code.";
     var amount = Number(value("amount"));
     if (!value("amount") || !isFinite(amount) || amount < 1 || amount > 50000) return "Enter an amount from $1 to $50,000.";
     if (!value("payment")) return "Choose how you would pay.";
     if (!document.getElementById("agreed").checked) return "The agreement is required.";
+    return "";
+  }
+
+  function phoneProblem() {
+    var raw = value("phone");
+    if (!raw) return "Enter a phone number.";
+    if (raw.indexOf("-") !== -1) return "Dashes are not allowed. Use digits only.";
+    if (!/^\d+$/.test(raw)) return "Use digits only.";
+    if (raw.length < 6 || raw.length > 12) return "Enter 6 to 12 digits.";
     return "";
   }
 

@@ -337,6 +337,14 @@ input, select {
 
 .form-error { color: var(--red); min-height: 1.2rem; }
 
+.field-error {
+  color: var(--red);
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+}
+
+.field-error:empty { display: none; }
+
 .hp { position: absolute; left: -9999px; }
 
 #success p { font-family: var(--serif); font-size: 1.6rem; line-height: 1.25; }

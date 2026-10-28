@@ -20,7 +20,9 @@ var HEADERS = [
   "Do you want to show your pledge publicly?",
   "Aggreement",
   "Display Name",
-  "Time"
+  "Time",
+  "Country Code",
+  "Phone"
 ];
 
 function doGet(e) {
@@ -62,6 +64,8 @@ function validate_(data) {
   var first = text_(data.firstName);
   var last = text_(data.lastName);
   var email = text_(data.email).toLowerCase();
+  var phone = text_(data.phone);
+  var countryCode = text_(data.countryCode);
   var country = text_(data.country);
   var displayName = text_(data.displayName);
   var payment = text_(data.payment);
@@ -72,6 +76,11 @@ function validate_(data) {
 
   if (!first || !last) return { error: "Enter your first and last name." };
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Enter a valid email address." };
+  if (!/^\+\d{1,3}$/.test(countryCode)) return { error: "Choose a country code." };
+  if (!phone) return { error: "Enter a phone number." };
+  if (phone.indexOf("-") !== -1) return { error: "Dashes are not allowed. Use digits only." };
+  if (!/^\d+$/.test(phone)) return { error: "Use digits only." };
+  if (phone.length < 6 || phone.length > 12) return { error: "Enter 6 to 12 digits." };
   if (!isFinite(age) || age < 1 || age > 120) return { error: "Enter your age." };
   if (!country) return { error: "Choose a country." };
   if (!isFinite(amount) || amount < 1 || amount > 50000) return { error: "Enter an amount from $1 to $50,000." };
@@ -84,6 +93,8 @@ function validate_(data) {
       lastName: last,
       age: Math.round(age),
       email: email,
+      phone: phone,
+      countryCode: countryCode,
       country: country,
       amount: Math.round(amount * 100) / 100,
       payment: payment,
@@ -102,7 +113,7 @@ function append_(row) {
     var id = Utilities.getUuid();
     var time = Utilities.formatDate(new Date(), "Etc/UTC", "yyyy-MM-dd HH:mm:ss 'UTC'");
     var map = headerMap_(sheet);
-    var line = new Array(HEADERS.length);
+    var line = new Array(Math.max(sheet.getLastColumn(), HEADERS.length));
     line[map.id] = id;
     line[map.first] = row.firstName;
     line[map.last] = row.lastName;
@@ -115,6 +126,8 @@ function append_(row) {
     line[map.agree] = row.agreed;
     line[map.display] = row.displayName;
     line[map.time] = time;
+    line[map.code] = row.countryCode;
+    line[map.phone] = row.phone;
     sheet.appendRow(line);
     return id;
   } finally {
@@ -197,7 +210,9 @@ function headerMap_(sheet) {
     pub: col(["do you want to show your pledge publicly?"]),
     agree: col(["aggreement", "agreement"]),
     display: col(["display name"]),
-    time: col(["time"])
+    time: col(["time"]),
+    code: col(["country code"]),
+    phone: col(["phone", "phone number"])
   };
 }
 

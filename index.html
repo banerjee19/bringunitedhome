@@ -116,7 +116,7 @@
       </details>
       <details>
         <summary>Who can see my details?</summary>
-        <p>Your email, age, and legal name stay off the page. Your display name, country, and amount appear only if you tick the public box.</p>
+        <p>Your email, phone number, age, and legal name stay off the page. Your display name, country, and amount appear only if you tick the public box.</p>
       </details>
       <details>
         <summary>What if the owners never sell?</summary>
@@ -163,6 +163,19 @@
         <select id="country" name="country" required>
           <option value="">Loading countries…</option>
         </select>
+        <div class="row">
+          <div>
+            <label for="country-code">Country code</label>
+            <select id="country-code" name="countryCode" required>
+              <option value="">Country code</option>
+            </select>
+          </div>
+          <div>
+            <label for="phone">Phone number</label>
+            <input id="phone" name="phone" type="tel" required inputmode="numeric" autocomplete="tel-national">
+            <p class="field-error" id="phone-error" role="alert"></p>
+          </div>
+        </div>
         <label for="amount">Amount you would commit, in dollars</label>
         <input id="amount" name="amount" type="number" min="1" max="50000" step="1" required inputmode="decimal">
         <label for="payment">Would you pay in one payment or in installments?</label>
@@ -172,7 +185,7 @@
         </select>
         <label class="check" for="is-public">
           <input id="is-public" name="isPublic" type="checkbox">
-          <span>Show this pledge publicly. Your display name, country, and amount can appear on the page. Your email and legal name will not.</span>
+          <span>Show this pledge publicly. Your display name, country, and amount can appear on the page. Your email, phone number, and legal name will not.</span>
         </label>
         <label for="display-name">Display name, optional</label>
         <input id="display-name" name="displayName" autocomplete="nickname">
@@ -198,6 +211,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/config.js"></script>
+  <script src="js/dial-codes.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
