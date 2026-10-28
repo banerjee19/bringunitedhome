@@ -26,6 +26,8 @@
   var geojson;
   var countryLayer;
   var latestStats = emptyStats();
+  var shownAmount = 0;
+  var amountFrame = 0;
 
   document.getElementById("open-pledge").addEventListener("click", openPanel);
   document.getElementById("close-pledge").addEventListener("click", closePanel);
@@ -43,7 +45,7 @@
     document.execCommand("copy");
   });
 
-  render(latestStats);
+  render(latestStats, "skip");
   loadMap();
   loadStats();
 
@@ -51,7 +53,7 @@
     return { pledged: 0, supporters: 0, countries: {}, recent: [], largest: [] };
   }
 
-  function render(stats) {
+  function render(stats, amountMode) {
     latestStats = stats || emptyStats();
     var pledged = Number(latestStats.pledged) || 0;
     var supporters = Number(latestStats.supporters) || 0;
@@ -59,7 +61,8 @@
     var countryCount = Object.keys(countryMap).filter(function (name) {
       return countryMap[name] > 0;
     }).length;
-    amountEl.textContent = money.format(pledged);
+    if (amountMode === "settle") settleAmount(pledged);
+    else if (amountMode !== "skip") setAmount(pledged);
     supportersEl.textContent = String(supporters);
     remainingEl.textContent = money.format(Math.max(0, config.target - pledged));
     countriesEl.textContent = String(countryCount);
@@ -95,11 +98,53 @@
     });
   }
 
+  function setAmount(value) {
+    cancelAnimationFrame(amountFrame);
+    shownAmount = Math.max(0, Math.round(Number(value) || 0));
+    amountEl.textContent = money.format(shownAmount);
+  }
+
+  function startLoadingAmount() {
+    cancelAnimationFrame(amountFrame);
+    shownAmount = 0;
+    var last = performance.now();
+    amountFrame = requestAnimationFrame(function tick(now) {
+      var dt = Math.min(48, now - last);
+      last = now;
+      shownAmount += dt * 0.85;
+      amountEl.textContent = money.format(Math.round(shownAmount));
+      amountFrame = requestAnimationFrame(tick);
+    });
+  }
+
+  function settleAmount(target) {
+    cancelAnimationFrame(amountFrame);
+    var from = shownAmount;
+    var goal = Math.max(0, Math.round(Number(target) || 0));
+    var start = performance.now();
+    var duration = 1000;
+    amountFrame = requestAnimationFrame(function tick(now) {
+      var t = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - t, 3);
+      shownAmount = from + (goal - from) * eased;
+      amountEl.textContent = money.format(Math.round(shownAmount));
+      if (t < 1) amountFrame = requestAnimationFrame(tick);
+      else setAmount(goal);
+    });
+  }
+
   function loadStats() {
-    if (!config.scriptUrl) return;
+    if (!config.scriptUrl) {
+      setAmount(0);
+      return;
+    }
+    startLoadingAmount();
     jsonp(config.scriptUrl, { action: "stats" }).then(function (data) {
-      if (data && data.stats) render(data.stats);
-    }).catch(function () {});
+      if (data && data.stats) render(data.stats, "settle");
+      else setAmount(0);
+    }).catch(function () {
+      setAmount(0);
+    });
   }
 
   function loadMap() {
@@ -227,7 +272,7 @@
         formError.textContent = (data && data.error) || "Could not save the pledge.";
         return;
       }
-      if (data.stats) render(data.stats);
+      if (data.stats) render(data.stats, "settle");
       else loadStats();
       share.value = "I pledged to Bring United Home. No money has been paid.";
       formFields.hidden = true;
