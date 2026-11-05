@@ -83,7 +83,7 @@
     if (amountMode === "settle") settleAmount(pledged);
     else if (amountMode !== "skip") setAmount(pledged);
     supportersEl.textContent = String(supporters);
-    remainingEl.textContent = money.format(Math.max(0, config.target - pledged));
+    remainingEl.textContent = billions(config.target - pledged);
     countriesEl.textContent = String(countryCount);
     renderList(recentEl, latestStats.recent);
     renderList(largestEl, latestStats.largest);
@@ -123,17 +123,17 @@
     amountEl.textContent = money.format(shownAmount);
   }
 
+  function billions(value) {
+    var n = Math.max(0, Number(value) || 0) / 1000000000;
+    var rounded = Math.round(n * 100) / 100;
+    var text = rounded.toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1");
+    return "$" + text + " billion";
+  }
+
   function startLoadingAmount() {
     cancelAnimationFrame(amountFrame);
     shownAmount = 0;
-    var last = performance.now();
-    amountFrame = requestAnimationFrame(function tick(now) {
-      var dt = Math.min(48, now - last);
-      last = now;
-      shownAmount += dt * 0.85;
-      amountEl.textContent = money.format(Math.round(shownAmount));
-      amountFrame = requestAnimationFrame(tick);
-    });
+    amountEl.textContent = "";
   }
 
   function settleAmount(target) {
@@ -141,7 +141,7 @@
     var from = shownAmount;
     var goal = Math.max(0, Math.round(Number(target) || 0));
     var start = performance.now();
-    var duration = 1000;
+    var duration = 1200;
     amountFrame = requestAnimationFrame(function tick(now) {
       var t = Math.min(1, (now - start) / duration);
       var eased = 1 - Math.pow(1 - t, 3);
