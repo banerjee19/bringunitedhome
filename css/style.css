@@ -347,27 +347,40 @@ input, select {
 
 .hp { position: absolute; left: -9999px; }
 
-.success-line {
-  margin: 0 0 0.6rem;
-  font-family: var(--serif);
-  font-size: 1.6rem;
-  line-height: 1.25;
+#success h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.7rem;
 }
 
-.verify p { margin: 0 0 0.8rem; }
+#success h3 {
+  margin: 1.2rem 0 0.45rem;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.verify-or { margin: 0.85rem 0 0.35rem; }
+
+.verify-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
 
 a.pledge-button {
   display: inline-block;
-  margin-top: 0.2rem;
+  margin-top: 0.35rem;
   text-decoration: none;
 }
 
 .goal {
   position: relative;
-  height: 4.75rem;
-  margin: 0 0 1.1rem;
+  height: 12rem;
+  margin: 0;
   overflow: hidden;
 }
+
+.goal[hidden], #success-body[hidden] { display: none; }
 
 .goal-pitch {
   position: absolute;
@@ -412,9 +425,9 @@ a.pledge-button {
 
 #share-card {
   display: block;
-  width: 100%;
+  width: 78%;
   height: auto;
-  margin-top: 1.5rem;
+  margin-top: 0.4rem;
   background: #141210;
 }
 

@@ -207,19 +207,19 @@
         <div class="goal-posts"></div>
         <div class="goal-ball"></div>
       </div>
-      <div class="verify">
-        <p class="success-line">Your pledge is pending.</p>
-        <p>It is saved, and it is not on the public total yet. Send the email below from the address you entered. Leave the subject and the code as they are.</p>
-        <a class="pledge-button" id="send-verify" href="mailto:hello@bringunitedhome.org">Send verification email</a>
+      <div id="success-body" hidden>
+        <h2>Thanks for pledging to Bring United Home</h2>
+        <h3>Next Steps:</h3>
+        <a class="pledge-button" id="send-verify" href="mailto:pledge@bringunitedhome.org">Verify your pledge</a>
+        <p class="verify-or">Or, email <span id="verify-code"></span> to pledge@bringunitedhome.org</p>
+        <p class="verify-note">Only verified pledges will count towards the total</p>
+        <h3>Share with your Friends.</h3>
+        <canvas id="share-card" width="720" height="960" aria-label="A picture you can share"></canvas>
+        <div class="share-actions">
+          <button class="pledge-button" id="copy-share" type="button">Copy</button>
+          <button class="text-button" id="save-card" type="button">Save</button>
+        </div>
       </div>
-      <canvas id="share-card" width="720" height="960" aria-label="A picture you can share"></canvas>
-      <div class="share-actions">
-        <button class="text-button" id="save-card" type="button">Save</button>
-        <button class="text-button" id="share-card-btn" type="button">Share</button>
-      </div>
-      <label for="share-line">Or copy this sentence</label>
-      <textarea class="share" id="share-line" readonly></textarea>
-      <button class="pledge-button" id="copy-share" type="button">Copy</button>
     </div>
   </aside>
 

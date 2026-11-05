@@ -19,7 +19,6 @@
   var formError = document.getElementById("form-error");
   var formFields = document.getElementById("form-fields");
   var success = document.getElementById("success");
-  var share = document.getElementById("share-line");
   var panel = document.getElementById("panel");
   var overlay = document.getElementById("overlay");
   var isPublic = document.getElementById("is-public");
@@ -39,13 +38,12 @@
   });
   form.addEventListener("submit", onSubmit);
   countrySelect.addEventListener("change", syncCountryCode);
+  var shareLine = "";
   document.getElementById("copy-share").addEventListener("click", function () {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(share.value);
+      navigator.clipboard.writeText(shareLine);
       return;
     }
-    share.select();
-    document.execCommand("copy");
   });
   document.getElementById("save-card").addEventListener("click", function () {
     cardBlob(function (blob) {
@@ -55,16 +53,6 @@
       link.download = "bring-united-home.png";
       link.click();
       URL.revokeObjectURL(url);
-    });
-  });
-  document.getElementById("share-card-btn").addEventListener("click", function () {
-    cardBlob(function (blob) {
-      var file = new File([blob], "bring-united-home.png", { type: "image/png" });
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], text: share.value }).catch(function () {});
-        return;
-      }
-      document.getElementById("save-card").click();
     });
   });
 
@@ -345,19 +333,38 @@
 
   function showSuccess(data) {
     var first = value("first-name") || "A supporter";
-    var line = first + " pledged to make Manchester United a fan owned club.";
-    share.value = line + " No money has been paid.";
+    var line = first + " pledged to make Manchester United a fan owned club";
+    var code = data.code || "";
+    shareLine = line;
+    document.getElementById("verify-code").textContent = code;
     var subject = "Pledge " + (data.id || "");
-    var body = "Verification code: " + (data.code || "");
-    document.getElementById("send-verify").href = "mailto:hello@bringunitedhome.org?subject="
+    var body = "Verification code: " + code;
+    document.getElementById("send-verify").href = "mailto:pledge@bringunitedhome.org?subject="
       + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-    var goal = document.getElementById("goal");
-    goal.classList.remove("play");
-    void goal.offsetWidth;
-    goal.classList.add("play");
     drawCard(line);
     formFields.hidden = true;
     success.hidden = false;
+    playGoal();
+  }
+
+  function playGoal() {
+    var goal = document.getElementById("goal");
+    var body = document.getElementById("success-body");
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      goal.hidden = true;
+      body.hidden = false;
+      return;
+    }
+    body.hidden = true;
+    goal.hidden = false;
+    goal.classList.remove("play");
+    void goal.offsetWidth;
+    goal.classList.add("play");
+    window.setTimeout(function () {
+      goal.hidden = true;
+      body.hidden = false;
+    }, 1600);
   }
 
   function drawCard(line) {
