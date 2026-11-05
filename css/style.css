@@ -347,7 +347,88 @@ input, select {
 
 .hp { position: absolute; left: -9999px; }
 
-#success p { font-family: var(--serif); font-size: 1.6rem; line-height: 1.25; }
+.success-line {
+  margin: 0 0 0.6rem;
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  line-height: 1.25;
+}
+
+.verify p { margin: 0 0 0.8rem; }
+
+a.pledge-button {
+  display: inline-block;
+  margin-top: 0.2rem;
+  text-decoration: none;
+}
+
+.goal {
+  position: relative;
+  height: 4.75rem;
+  margin: 0 0 1.1rem;
+  overflow: hidden;
+}
+
+.goal-pitch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.35rem;
+  height: 2px;
+  background: var(--ink);
+}
+
+.goal-posts {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.35rem;
+  width: 4.4rem;
+  height: 2.5rem;
+  border: 3px solid var(--ink);
+  border-bottom: 0;
+}
+
+.goal-ball {
+  position: absolute;
+  left: 0.35rem;
+  bottom: 0.2rem;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.goal.play .goal-ball { animation: goal-kick 1.5s ease-in forwards; }
+
+@keyframes goal-kick {
+  0% { transform: translate(0, 0); }
+  65% { transform: translate(11.5rem, -1.7rem); }
+  100% { transform: translate(15.2rem, 0.15rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal { display: none; }
+}
+
+#share-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 1.5rem;
+  background: #141210;
+}
+
+.share-actions { display: flex; gap: 1rem; margin-top: 0.55rem; }
+
+.text-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.text-button:hover { color: var(--ink); }
 
 .share {
   width: 100%;

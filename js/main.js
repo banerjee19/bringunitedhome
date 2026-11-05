@@ -47,6 +47,26 @@
     share.select();
     document.execCommand("copy");
   });
+  document.getElementById("save-card").addEventListener("click", function () {
+    cardBlob(function (blob) {
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = url;
+      link.download = "bring-united-home.png";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+  });
+  document.getElementById("share-card-btn").addEventListener("click", function () {
+    cardBlob(function (blob) {
+      var file = new File([blob], "bring-united-home.png", { type: "image/png" });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], text: share.value }).catch(function () {});
+        return;
+      }
+      document.getElementById("save-card").click();
+    });
+  });
 
   render(latestStats, "skip");
   loadMap();
@@ -316,13 +336,75 @@
       }
       if (data.stats) render(data.stats, "settle");
       else loadStats();
-      share.value = "I pledged to Bring United Home. No money has been paid.";
-      formFields.hidden = true;
-      success.hidden = false;
+      showSuccess(data);
     }).catch(function () {
       button.disabled = false;
       formError.textContent = "Could not reach the pledge book.";
     });
+  }
+
+  function showSuccess(data) {
+    var first = value("first-name") || "A supporter";
+    var line = first + " pledged to make Manchester United a fan owned club.";
+    share.value = line + " No money has been paid.";
+    var subject = "Pledge " + (data.id || "");
+    var body = "Verification code: " + (data.code || "");
+    document.getElementById("send-verify").href = "mailto:hello@bringunitedhome.org?subject="
+      + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    var goal = document.getElementById("goal");
+    goal.classList.remove("play");
+    void goal.offsetWidth;
+    goal.classList.add("play");
+    drawCard(line);
+    formFields.hidden = true;
+    success.hidden = false;
+  }
+
+  function drawCard(line) {
+    var canvas = document.getElementById("share-card");
+    var ctx = canvas.getContext("2d");
+    var img = new Image();
+    img.onload = function () { paintCard(ctx, canvas, img, line); };
+    img.onerror = function () { paintCard(ctx, canvas, null, line); };
+    img.src = "images/option-alone-2.jpg";
+  }
+
+  function paintCard(ctx, canvas, img, line) {
+    ctx.fillStyle = "#141210";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (img) ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.font = "600 40px Georgia, serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#f4f0e8";
+    var lines = wrapLines(ctx, line, canvas.width - 96);
+    var y = canvas.height * 0.46;
+    lines.forEach(function (row) {
+      ctx.fillText(row, canvas.width / 2, y);
+      y += 52;
+    });
+  }
+
+  function wrapLines(ctx, text, maxWidth) {
+    var words = text.split(" ");
+    var lines = [];
+    var line = "";
+    words.forEach(function (word) {
+      var trial = line ? line + " " + word : word;
+      if (ctx.measureText(trial).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = trial;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function cardBlob(done) {
+    document.getElementById("share-card").toBlob(function (blob) {
+      if (blob) done(blob);
+    }, "image/png");
   }
 
   function postPledge(payload) {
