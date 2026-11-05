@@ -125,16 +125,8 @@
 
   function startLoadingAmount() {
     cancelAnimationFrame(amountFrame);
-    var start = performance.now();
-    amountFrame = requestAnimationFrame(function tick(now) {
-      var elapsed = now - start;
-      var digits = "";
-      for (var i = 0; i < 7; i++) {
-        digits += String(Math.floor(elapsed / (36 + i * 26)) % 10);
-      }
-      amountEl.textContent = money.format(Number(digits));
-      amountFrame = requestAnimationFrame(tick);
-    });
+    shownAmount = 0;
+    amountEl.textContent = money.format(0);
   }
 
   function settleAmount(target) {
@@ -160,7 +152,7 @@
     }
     startLoadingAmount();
     jsonp(config.scriptUrl, { action: "stats" }).then(function (data) {
-      if (data && data.stats) render(data.stats);
+      if (data && data.stats) render(data.stats, "settle");
       else setAmount(0);
     }).catch(function () {
       setAmount(0);
