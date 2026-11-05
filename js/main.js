@@ -343,6 +343,7 @@
       + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     drawCard(line);
     formFields.hidden = true;
+    document.getElementById("panel-title").hidden = true;
     success.hidden = false;
     playGoal();
   }
