@@ -357,9 +357,10 @@
     var line = first + " pledged to make Manchester United a fan owned club";
     var code = data.code || "";
     shareLine = line;
-    document.getElementById("verify-code").textContent = code;
     var subject = "Pledge " + (data.id || "");
     var body = "Verification code: " + code;
+    document.getElementById("verify-code").textContent = code;
+    document.getElementById("verify-subject").textContent = subject;
     document.getElementById("send-verify").href = "mailto:pledge@bringunitedhome.org?subject="
       + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     drawCard(line);
