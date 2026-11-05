@@ -83,7 +83,7 @@
     if (amountMode === "settle") settleAmount(pledged);
     else if (amountMode !== "skip") setAmount(pledged);
     supportersEl.textContent = String(supporters);
-    remainingEl.textContent = billions(config.target - pledged);
+    remainingEl.textContent = money.format(Math.max(0, config.target - pledged));
     countriesEl.textContent = String(countryCount);
     renderList(recentEl, latestStats.recent);
     renderList(largestEl, latestStats.largest);
@@ -123,17 +123,18 @@
     amountEl.textContent = money.format(shownAmount);
   }
 
-  function billions(value) {
-    var n = Math.max(0, Number(value) || 0) / 1000000000;
-    var rounded = Math.round(n * 100) / 100;
-    var text = rounded.toFixed(2).replace(/\.00$/, "").replace(/(\.\d)0$/, "$1");
-    return "$" + text + " billion";
-  }
-
   function startLoadingAmount() {
     cancelAnimationFrame(amountFrame);
-    shownAmount = 0;
-    amountEl.textContent = "";
+    var start = performance.now();
+    amountFrame = requestAnimationFrame(function tick(now) {
+      var elapsed = now - start;
+      var digits = "";
+      for (var i = 0; i < 7; i++) {
+        digits += String(Math.floor(elapsed / (36 + i * 26)) % 10);
+      }
+      amountEl.textContent = money.format(Number(digits));
+      amountFrame = requestAnimationFrame(tick);
+    });
   }
 
   function settleAmount(target) {
@@ -159,7 +160,7 @@
     }
     startLoadingAmount();
     jsonp(config.scriptUrl, { action: "stats" }).then(function (data) {
-      if (data && data.stats) render(data.stats, "settle");
+      if (data && data.stats) render(data.stats);
       else setAmount(0);
     }).catch(function () {
       setAmount(0);

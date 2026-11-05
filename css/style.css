@@ -282,6 +282,22 @@ h2 {
   font-size: 0.92rem;
 }
 
+.policy { max-width: 42rem; padding-top: 2.5rem; }
+
+.policy h1 {
+  margin: 0 0 0.4rem;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.policy .updated {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
