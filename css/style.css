@@ -335,6 +335,8 @@ input, select {
 
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
+#turnstile-widget { margin-top: 1.1rem; min-height: 65px; }
+
 .form-error { color: var(--red); min-height: 1.2rem; }
 
 .field-error {

@@ -4,6 +4,7 @@
  * Execute as: Me
  * Who has access: Anyone
  * Copy the web app URL into js/config.js as scriptUrl.
+ * Project Settings, Script properties: TURNSTILE_SECRET = the Turnstile secret key.
  *
  * The sheet stays private. This script returns totals and public names only.
  */
@@ -40,6 +41,8 @@ function doPost(e) {
     var raw = e.postData && e.postData.contents ? e.postData.contents : "{}";
     var data = JSON.parse(raw);
     if (data.company) return respond_(e, { ok: false, error: "Rejected." });
+    var turnstileError = verifyTurnstile_(data.turnstileToken);
+    if (turnstileError) return respond_(e, { ok: false, error: turnstileError });
     var clean = validate_(data);
     if (clean.error) return respond_(e, { ok: false, error: clean.error });
     var saved = append_(clean.value);
@@ -60,6 +63,25 @@ function respond_(e, obj) {
   return ContentService
     .createTextOutput(text)
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function verifyTurnstile_(token) {
+  var secret = PropertiesService.getScriptProperties().getProperty("TURNSTILE_SECRET");
+  if (!secret) return "The pledge check is not ready.";
+  if (!token) return "Confirm you are a person and try again.";
+  var response = UrlFetchApp.fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "post",
+    payload: { secret: secret, response: String(token) },
+    muteHttpExceptions: true
+  });
+  var body = {};
+  try {
+    body = JSON.parse(response.getContentText() || "{}");
+  } catch (err) {
+    return "Confirm you are a person and try again.";
+  }
+  if (!body.success) return "Confirm you are a person and try again.";
+  return "";
 }
 
 function validate_(data) {

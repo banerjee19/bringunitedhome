@@ -29,6 +29,14 @@
   var latestStats = emptyStats();
   var shownAmount = 0;
   var amountFrame = 0;
+  var turnstileWidget = null;
+
+  window.BUHTurnstile = function () {
+    if (!config.turnstileSiteKey || !window.turnstile) return;
+    turnstileWidget = window.turnstile.render("#turnstile-widget", {
+      sitekey: config.turnstileSiteKey
+    });
+  };
 
   document.getElementById("open-pledge").addEventListener("click", openPanel);
   document.getElementById("close-pledge").addEventListener("click", closePanel);
@@ -299,6 +307,17 @@
       formError.textContent = "The pledge book is not connected yet.";
       return;
     }
+    if (!config.turnstileSiteKey) {
+      formError.textContent = "The pledge check is not ready.";
+      return;
+    }
+    var turnstileToken = window.turnstile && turnstileWidget !== null
+      ? window.turnstile.getResponse(turnstileWidget)
+      : "";
+    if (!turnstileToken) {
+      formError.textContent = "Confirm you are a person, then register the pledge.";
+      return;
+    }
     var payload = {
       firstName: value("first-name"),
       lastName: value("last-name"),
@@ -312,7 +331,8 @@
       isPublic: isPublic.checked,
       agreed: document.getElementById("agreed").checked,
       displayName: value("display-name"),
-      company: value("company")
+      company: value("company"),
+      turnstileToken: turnstileToken
     };
     var button = document.getElementById("submit-pledge");
     button.disabled = true;
@@ -320,6 +340,7 @@
       button.disabled = false;
       if (!data || !data.ok) {
         formError.textContent = (data && data.error) || "Could not save the pledge.";
+        if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
         return;
       }
       if (data.stats) render(data.stats, "settle");

@@ -197,6 +197,7 @@
           <label for="company">Company</label>
           <input id="company" name="company" tabindex="-1" autocomplete="off">
         </div>
+        <div id="turnstile-widget"></div>
         <p class="form-error" id="form-error" role="alert"></p>
         <button class="pledge-button" id="submit-pledge" type="submit">Register pledge</button>
       </form>
@@ -227,5 +228,6 @@
   <script src="js/config.js"></script>
   <script src="js/dial-codes.js"></script>
   <script src="js/main.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=BUHTurnstile" async defer></script>
 </body>
 </html>
