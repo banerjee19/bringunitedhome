@@ -22,7 +22,9 @@ var HEADERS = [
   "Display Name",
   "Time",
   "Country Code",
-  "Phone"
+  "Phone",
+  "Status",
+  "Verification code"
 ];
 
 function doGet(e) {
@@ -40,8 +42,8 @@ function doPost(e) {
     if (data.company) return respond_(e, { ok: false, error: "Rejected." });
     var clean = validate_(data);
     if (clean.error) return respond_(e, { ok: false, error: clean.error });
-    var id = append_(clean.value);
-    return respond_(e, { ok: true, id: id, stats: readStats_() });
+    var saved = append_(clean.value);
+    return respond_(e, { ok: true, id: saved.id, code: saved.code, stats: readStats_() });
   } catch (err) {
     return respond_(e, { ok: false, error: "Could not save the pledge." });
   }
@@ -111,6 +113,7 @@ function append_(row) {
   try {
     var sheet = getSheet_();
     var id = Utilities.getUuid();
+    var code = secretCode_();
     var time = Utilities.formatDate(new Date(), "Etc/UTC", "yyyy-MM-dd HH:mm:ss 'UTC'");
     var map = headerMap_(sheet);
     var line = new Array(Math.max(sheet.getLastColumn(), HEADERS.length));
@@ -128,8 +131,10 @@ function append_(row) {
     line[map.time] = time;
     line[map.code] = row.countryCode;
     line[map.phone] = row.phone;
+    line[map.status] = "Pending";
+    line[map.verify] = code;
     sheet.appendRow(line);
-    return id;
+    return { id: id, code: code };
   } finally {
     lock.releaseLock();
   }
@@ -145,6 +150,7 @@ function readStats_() {
   var publicRows = [];
 
   for (var i = 1; i < values.length; i++) {
+    if (!isVerified_(values[i][map.status])) continue;
     var amount = Number(values[i][map.amount]);
     if (!isFinite(amount) || amount <= 0) continue;
     supporters++;
@@ -212,12 +218,27 @@ function headerMap_(sheet) {
     display: col(["display name"]),
     time: col(["time"]),
     code: col(["country code"]),
-    phone: col(["phone", "phone number"])
+    phone: col(["phone", "phone number"]),
+    status: col(["status"]),
+    verify: col(["verification code"])
   };
 }
 
 function isYes_(value) {
   return /^(yes|true|y|1)$/i.test(text_(value));
+}
+
+function isVerified_(value) {
+  return text_(value).toLowerCase() === "verified";
+}
+
+function secretCode_() {
+  var alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  var out = "";
+  for (var i = 0; i < 8; i++) {
+    out += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+  }
+  return out;
 }
 
 function text_(value) {
