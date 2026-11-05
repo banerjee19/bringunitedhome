@@ -6,6 +6,10 @@
  * Copy the web app URL into js/config.js as scriptUrl.
  * Project Settings, Script properties: TURNSTILE_SECRET = the Turnstile secret key.
  *
+ * Verification mail is read from the Gmail account that owns this sheet.
+ * Run installPledgeMailTrigger once. It checks the Gmail label "Pledges" every hour.
+ * A row becomes Verified only when the pledge ID, the code, and the From address all match.
+ *
  * The sheet stays private. This script returns totals and public names only.
  */
 
@@ -269,4 +273,122 @@ function text_(value) {
 
 function norm_(value) {
   return text_(value).toLowerCase();
+}
+
+var PLEDGE_MAIL_QUERY = 'label:pledges -label:"pledge checked" newer_than:14d';
+var OWN_MAILBOXES = {
+  "hello@bringunitedhome.org": true,
+  "pledge@bringunitedhome.org": true,
+  "bringunitedhome@gmail.com": true
+};
+
+function installPledgeMailTrigger() {
+  var existing = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i].getHandlerFunction() === "checkPledgeMail") {
+      ScriptApp.deleteTrigger(existing[i]);
+    }
+  }
+  ScriptApp.newTrigger("checkPledgeMail").timeBased().everyHours(1).create();
+}
+
+function checkPledgeMail() {
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) {
+    Logger.log("Pledge mail check skipped because the sheet is busy.");
+    return;
+  }
+  try {
+    var sheet = getSheet_();
+    var map = headerMap_(sheet);
+    var values = sheet.getDataRange().getValues();
+    var pending = {};
+    for (var i = 1; i < values.length; i++) {
+      if (text_(values[i][map.status]).toLowerCase() !== "pending") continue;
+      var id = text_(values[i][map.id]).toLowerCase();
+      if (!id) continue;
+      pending[id] = {
+        row: i + 1,
+        email: text_(values[i][map.email]).toLowerCase(),
+        code: text_(values[i][map.verify]).toLowerCase()
+      };
+    }
+
+    var checked = gmailLabel_("Pledge checked");
+    var threadsRead = 0;
+    var verifiedCount = 0;
+    for (var page = 0; page < 4; page++) {
+      var threads = GmailApp.search(PLEDGE_MAIL_QUERY, 0, 25);
+      if (!threads.length) break;
+      for (var t = 0; t < threads.length; t++) {
+        var messages = threads[t].getMessages();
+        for (var m = 0; m < messages.length; m++) {
+          if (verifyFromMessage_(messages[m], pending, sheet, map)) verifiedCount++;
+        }
+        threads[t].addLabel(checked);
+        threadsRead++;
+      }
+    }
+    Logger.log("Threads read: " + threadsRead + ". Newly verified: " + verifiedCount);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function verifyFromMessage_(message, pending, sheet, map) {
+  var id = pledgeIdFrom_(message.getSubject()) || pledgeIdFrom_(message.getPlainBody());
+  if (!id) return false;
+  var row = pending[id];
+  if (!row) {
+    Logger.log("No pending row for " + id);
+    return false;
+  }
+  var code = codeFrom_(message.getPlainBody());
+  if (!code || code !== row.code) {
+    Logger.log("Code did not match for " + id);
+    return false;
+  }
+  var from = senderAddress_(message);
+  if (!from || from !== row.email) {
+    Logger.log("From did not match for " + id + ". Sender seen: " + from);
+    return false;
+  }
+  sheet.getRange(row.row, map.status + 1).setValue("Verified");
+  delete pending[id];
+  Logger.log("Verified " + id);
+  return true;
+}
+
+function pledgeIdFrom_(value) {
+  var match = text_(value).match(/pledge\s+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+  if (!match) {
+    match = text_(value).match(/\b([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i);
+  }
+  return match ? match[1].toLowerCase() : "";
+}
+
+function codeFrom_(value) {
+  var match = text_(value).match(/verification code:\s*([a-hj-np-z2-9]{8})/i);
+  return match ? match[1].toLowerCase() : "";
+}
+
+function senderAddress_(message) {
+  var from = emailAddress_(message.getFrom());
+  if (from && !OWN_MAILBOXES[from]) return from;
+  var reply = emailAddress_(message.getReplyTo());
+  if (reply && !OWN_MAILBOXES[reply]) return reply;
+  var wrapped = text_(message.getPlainBody()).match(/from:\s*(?:.*<)?([^\s<>]+@[^\s<>]+)/i);
+  var inner = wrapped ? text_(wrapped[1]).toLowerCase() : "";
+  if (inner && !OWN_MAILBOXES[inner]) return inner;
+  return from;
+}
+
+function emailAddress_(value) {
+  var raw = text_(value);
+  var match = raw.match(/<([^>]+)>/);
+  return text_(match ? match[1] : raw).toLowerCase();
+}
+
+function gmailLabel_(name) {
+  return GmailApp.getUserLabelByName(name) || GmailApp.createLabel(name);
 }
